@@ -1,0 +1,239 @@
+
+.request-info {
+    width: 380px;
+    padding: 15px 20px;
+    background-color: var(--form-background);
+}
+
+/* Apply "Lato" font family to all form fields except #submitBtn
+#rfiform input[type="text"],
+#rfiform input[type="email"],
+#rfiform input[type="password"],
+#rfiform textarea,
+#rfiform select,
+#rfiform input[type="checkbox"],
+#rfiform input[type="radio"],
+#rfiform input[type="number"],
+#rfiform input[type="tel"],
+#rfiform input[type="url"],
+#rfiform input[type="search"],
+#rfiform input[type="date"],
+#rfiform input[type="time"],
+#rfiform input[type="datetime-local"],
+#rfiform input[type="month"],
+#rfiform input[type="week"],
+#rfiform input[type="color"],
+#rfiform input[type="range"],
+#rfiform input[type="file"],
+#rfiform input[type="reset"],
+#rfiform input[type="submit"],
+#rfiform button:not(#submitBtn) {
+    font-family: var(--secondary-font);
+}
+ */
+.goback {
+    display: block;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 7px;
+}
+
+.goback:hover {
+    color: var(--form-text-color);
+}
+
+form label {
+    display: none;
+}
+
+form input, form select {
+    max-width: 100%;
+    width: 100%;
+}
+
+.request-info .form-header {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    color: var(--form-heading-color);
+    margin-bottom: 10px;
+}
+
+.request-info.is-one-step {
+    height: 100%;
+}
+
+/* RFI form styles */
+#rfiform .field {
+    margin-bottom: 24px;
+    padding: 0.1em 0.2em;
+    border: 1px solid #777;
+    background: #fff;
+}
+
+#rfiform .field > .inner {
+    position: relative;
+    padding: 4px 3px;
+    font-size: 0;
+}
+
+#rfiform .placeholder, #rfiform input, #rfiform select {
+    height: 1.4em;
+    line-height: 1.4em;
+    padding-right: 30px;
+    z-index: 5;
+    background-color: transparent;
+    font-size: 1em;
+    font-weight: 400;
+}
+
+#rfiform input[type=email], #rfiform input[type=number], #rfiform input[type=tel], #rfiform input[type=text], #rfiform select, #rfiform textarea {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: block;
+    position: relative;
+    color: var(--form-text-color);
+    font-size: 16px;
+    outline: none!important;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    z-index: 1;
+}
+
+#rfiform select {
+    padding-right: 30px;
+}
+
+#rfiform .actions {
+    clear: both;
+    padding: 0;
+    border: 0;
+    background: 0 0;
+}
+
+#rfiform .actions .field {
+    margin-bottom: 15px;
+    padding: 0;
+    border: 0;
+    background: 0 0;
+    text-align: center;
+}
+
+#rfiform .form-button {
+    width: 100%;
+    padding: 16px;
+    line-height: 1;
+    font-size: 16px;
+    font-weight: 900;
+    text-transform: uppercase;
+    border: solid 1px var(--button-border);
+    background-color: var(--button-background);
+    color: var(--button-text-color);
+    cursor: pointer;
+}
+
+#rfiform .error-message {
+    top: 33px;
+    right: -4px;
+    width: calc(100% - 2px);
+    padding: 0 5px;
+    z-index: 5;
+    position: absolute;
+    color: #fff;
+    background: var(--form-error-color);
+    font-size: 13px;
+    display: block;
+}
+
+#rfiform [data-field-type=select] .inner:after {
+    top: 25%;
+    right: 3%;
+    content: '\25bc';
+    line-height: 1em;
+    font-size: 14px;
+    transform: scale(1,.65);
+    color: #333;
+    position: absolute;
+    display: block;
+    z-index: 0;
+}
+
+#rfiform div.error {
+    top: 0;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    z-index: 999;
+    position: absolute;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    background: var(--form-error-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.request-info .disclaimer {
+    display: block;
+    font-size: 14px;
+    color: var(--form-text-color);
+    line-height: 1;
+    margin-top: 28px;
+    margin-bottom: 0;
+}
+
+/* Custom Form 2 Step Styles */
+.request-info.is-two-step {
+    align-self: center;
+    padding: 35px 17px 40px 22px;
+}
+
+.request-info.is-two-step .form-header {
+    line-height: 1;
+    margin-bottom: 14px;
+}
+
+.two-step .step-one-images, .two-step .step-two-images {
+    display: flex;
+    justify-content: center;
+    height: 18px;
+}
+
+.two-step .steps-text {
+    margin: 9.5px 0 27px;
+    font-size: 13px;
+}
+
+.two-step .hide-step {
+    display: none;
+}
+
+div[data-field-name="validate_xx"] {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 0;
+    width: 0;
+    z-index: -1;
+}
+
+/* Media Queries */
+@media screen and (max-width: 999px) {
+    .request-info {
+        width: 100%;
+        height: auto;
+    }
+    .two-step .step-one-images, .two-step .step-two-images {
+        text-align: center;
+    }
+}

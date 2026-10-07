@@ -1,0 +1,39 @@
+
+.settings_page_custom-rfi-form .form-table td {
+    background-color: #fff;
+    padding: 20px 10px;
+    display: flex;
+    gap: 10px 40px;
+    flex-wrap: wrap;
+}
+#opt_group_order_repeater thead tr ,
+#opt_group_order_repeater tbody tr {
+    display: flex;
+}
+
+#opt_group_order_repeater thead th {
+    padding: 20px 10px;
+}
+
+.settings_page_custom-rfi-form .form-table #opt_group_order_repeater td {
+    padding: 5px 10px;
+}
+
+.color-picker{
+    min-width: 205px;
+    display: flex;
+    align-items: center;
+}
+.color-picker label{
+    margin-left: 10px;
+}
+input[type="radio"]:checked::before {
+    margin: 0.2rem;
+}
+
+@media screen and (min-width: 1200px) {
+    .settings_page_custom-rfi-form form {
+        margin-right: 300px;
+    }
+    
+}

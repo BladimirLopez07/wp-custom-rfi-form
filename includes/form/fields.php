@@ -141,8 +141,8 @@ function custom_rfi_form_get_fields() {
 
         if ( isset( $core_fields[ $key ] ) ) {
             // Built-in fields only take these overrides. Their name, type and validation
-            // stay fixed because the lead API and the scripts rely on them.
-            $overrides = array_intersect_key( $field, array_flip( array( 'label', 'priority', 'max_length', 'enabled' ) ) );
+            // stay fixed because the lead API and the scripts rely on them. Email always stays on.
+            $overrides = array_intersect_key( $field, array_flip( 'email' === $key ? array( 'label', 'priority', 'max_length' ) : array( 'label', 'priority', 'max_length', 'enabled' ) ) );
 
             $valid[ $key ]             = array_merge( $core_fields[ $key ], $overrides, array( 'custom' => false ) );
             $valid[ $key ]['priority'] = (int) $valid[ $key ]['priority'];

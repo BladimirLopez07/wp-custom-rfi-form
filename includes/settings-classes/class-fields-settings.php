@@ -285,7 +285,7 @@ class Custom_RFI_Form_Fields_Settings {
             'general_settings_section',
             array(
                 'label_for'   => 'opt_group_order',
-                'description' => 'Leave blank for alphabetical sorting.',
+                'description' => 'Groups listed here come first, in this order. Any other group follows alphabetically.',
             )
         );   
 

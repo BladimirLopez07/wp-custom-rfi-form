@@ -31,6 +31,14 @@ function groupOptionsByAttribute(options, attribute) {
     }, {});
 }
 
+// Orders optgroup names: the ones in the "Option Group Order" setting first, in that order,
+// then every other group alphabetically, so no group (and none of its programs) is dropped.
+function orderGroupKeys(groupKeys, preferredOrder = []) {
+    const preferred = (preferredOrder || []).filter(key => groupKeys.includes(key));
+    const remaining = groupKeys.filter(key => !preferred.includes(key)).sort();
+    return preferred.concat(remaining);
+}
+
 // Updates the options of a given select element.
 // Can optionally group the options into optgroups.
 function updateOptions(selectElement, optionList = [], defaultOption, createOptGroups = false) {
@@ -47,15 +55,8 @@ function updateOptions(selectElement, optionList = [], defaultOption, createOptG
     if (createOptGroups && optionList.length) {
         const groupedOptions = groupOptionsByAttribute(optionList, 'data-aos');
         
-        let sortedKeys;
-        if (CustomRfiFormData.opt_group_order && CustomRfiFormData.opt_group_order.length > 0) {
-            // Sort optgroups based on opt_group_order array
-            sortedKeys = CustomRfiFormData.opt_group_order.filter(key => groupedOptions.hasOwnProperty(key));
-        } else {
-            // Alphabetically sort optgroups
-            sortedKeys = Object.keys(groupedOptions).sort();
-        }
-    
+        const sortedKeys = orderGroupKeys(Object.keys(groupedOptions), CustomRfiFormData.opt_group_order);
+
         sortedKeys.forEach(key => {
             const optgroup = document.createElement('optgroup');
             optgroup.label = key;

@@ -131,8 +131,8 @@ function validateFirstLastName(inputField) {
     }
 
     // Remove invalid characters
-    if (/[^A-Za-z\s'-]/.test(inputValue)) {
-        inputValue = inputValue.replace(/[^A-Za-z\s'-]/g, "");
+    if (/[^\p{L}\p{M}\s'’-]/u.test(inputValue)) {
+        inputValue = inputValue.replace(/[^\p{L}\p{M}\s'’-]/gu, "");
         inputField.value = inputValue;
     }
 
@@ -143,7 +143,7 @@ function validateFirstLastName(inputField) {
     }
 
     // Validate for at least two alphabetic characters
-    if (!/[A-Za-z].*[A-Za-z]/.test(inputValue)) {
+    if (!/\p{L}.*\p{L}/u.test(inputValue)) {
         errorMessages.push(defaultMessages[inputField.id]);
     }
 

@@ -60,7 +60,7 @@ The form uses fixed element IDs, so only one form per page is supported.
 | Highest Level of Education      | Options as `Label : value`, one per line.                                                |
 | Start Term                      | Options as `Label : value`, one per line.                                                |
 | Program Option Group            | Group programs into `<optgroup>`s by area of study.                                      |
-| Option Group Order              | Custom order of those groups (alphabetical when empty).                                  |
+| Option Group Order              | Groups listed here come first, in order; any other group follows alphabetically.         |
 | Disclaimer                      | Consent text shown below the form and sent as `UserAgreement`.                           |
 | Thank You URL Type / URL        | Internal page or external URL to redirect to. Falls back to the home page.               |
 | Return LeadId                   | Ask the API to return a lead ID even for unsuccessful leads.                             |

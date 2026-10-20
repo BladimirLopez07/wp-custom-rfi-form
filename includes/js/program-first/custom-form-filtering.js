@@ -1,7 +1,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize variables to hold campus options and a fragment
-    const campusSelect = document.getElementById('CampusId');
+    // Initialize variables to hold campus options and a fragment.
+    // When "Campus" is not in the form fields, #CampusId is a hidden input, not a select:
+    // campusSelect is then null and every campus step below is skipped.
+    const campusSelect = document.querySelector('select#CampusId');
     const campusFragment = document.createDocumentFragment();
     const programSelect = document.getElementById('ProgramId');
     const programFragment = document.createDocumentFragment();
@@ -9,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to clear options of a select element and keep the default one
     const clearOptions = (selectElement) => {
+        if (!selectElement) return;
         const defaultOptionText = selectElement.options[0].textContent;
         selectElement.innerHTML = '';
         const defaultOption = document.createElement('option');
@@ -21,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to sort select options alphabetically, keeping default option at the top
     const sortSelectOptions = (selectElement) => {
+        if (!selectElement) return;
         const options = Array.from(selectElement.options);
         const selectedOptionValue = selectElement.value;
 
@@ -38,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Populate campus options fragment
-    Array.from(campusSelect.options).forEach(option => {
+    Array.from(campusSelect ? campusSelect.options : []).forEach(option => {
         campusFragment.appendChild(option.cloneNode(true));
     });
 
@@ -59,12 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     // Ensure default options are selected
-    campusSelect.value = 'default';
+    if (campusSelect) campusSelect.value = 'default';
     programSelect.value = 'default';
     if (aosSelect) aosSelect.value = 'default';
 
     // Function to filter campus options based on selected program's data-campus attribute
     const filterCampusOptions = (selectedProgramOption) => {
+        if (!campusSelect) return;
         const selectedCampusIds = selectedProgramOption.getAttribute('data-campus').split(',');
         clearOptions(campusSelect);
         campusFragment.childNodes.forEach(option => {

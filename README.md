@@ -1,5 +1,7 @@
 # Custom RFI Form
 
+[![Tests](https://github.com/BladimirLopez07/wp-custom-rfi-form/actions/workflows/tests.yml/badge.svg)](https://github.com/BladimirLopez07/wp-custom-rfi-form/actions/workflows/tests.yml)
+
 A WordPress plugin that adds a request-for-information (RFI) lead form to school marketing sites. The form loads campuses and programs from a partner lead API, guides the visitor through choosing a program, and submits the lead back to the API with tracking and attribution data.
 
 - One-step or two-step layout
@@ -60,7 +62,7 @@ The form uses fixed element IDs, so only one form per page is supported.
 | Highest Level of Education      | Options as `Label : value`, one per line.                                                |
 | Start Term                      | Options as `Label : value`, one per line.                                                |
 | Program Option Group            | Group programs into `<optgroup>`s by area of study.                                      |
-| Option Group Order              | Custom order of those groups (alphabetical when empty).                                  |
+| Option Group Order              | Groups listed here come first, in order; any other group follows alphabetically.         |
 | Disclaimer                      | Consent text shown below the form and sent as `UserAgreement`.                           |
 | Thank You URL Type / URL        | Internal page or external URL to redirect to. Falls back to the home page.               |
 | Return LeadId                   | Ask the API to return a lead ID even for unsuccessful leads.                             |
@@ -145,13 +147,14 @@ The form posts to `admin-post.php?action=custom_rfi_form_submit`. The handler in
 
 1. Verifies the nonce and silently drops honeypot hits.
 2. Keeps only an allow-list of known fields, unslashed and sanitized.
-3. Normalizes the name, phone, email, zip and birth date.
-4. Looks up the city, state and country from the zip code, if a lookup URL is configured.
-5. Adds the user agent, IP address, analytics click IDs and landing-page query parameters as `AdditionalQuestions`.
-6. Posts the JSON to `<API URL>/institutions/lead-save`.
-7. Redirects to the thank-you page with the lead ID, processing status, and SHA-256 hashes of the email and E.164 phone. The hashes are for ad platforms' enhanced conversions.
+3. Normalizes formatting (phone, zip, spacing in names) without changing what the visitor typed: "José O'Connor" stays "José O'Connor".
+4. Validates every enabled field again on the server (`includes/lead-validation.php`): names, email, phone, zip, birth date, start term and education level. It also checks that the program exists in the directory the form was rendered from and is offered at the selected campus. All problems are reported at once, and nothing is sent until they are fixed.
+5. Looks up the city, state and country from the zip code, if a lookup URL is configured.
+6. Adds the user agent, IP address, analytics click IDs and landing-page query parameters as `AdditionalQuestions`.
+7. Posts the JSON to `<API URL>/institutions/lead-save`.
+8. Redirects to the thank-you page with the lead ID, processing status, and SHA-256 hashes of the email and E.164 phone. The hashes are for ad platforms' enhanced conversions.
 
-The thank-you URL rendered into the form is signed with an HMAC. The handler only follows it when the signature matches, so the field cannot be used as an open redirect.
+The thank-you URL and the feature list ID rendered into the form are signed with an HMAC. The handler only trusts them when the signature matches, so the return URL cannot be used as an open redirect and the directory used for validation cannot be swapped.
 
 ## Project structure
 
@@ -161,6 +164,7 @@ includes/
   class-custom-rfi-form-plugin.php       Settings page (Settings API)
   class-custom-form-shortcode.php        [custom_rfi_form] rendering and asset loading
   custom-form-submission.php             Lead submission handler
+  lead-validation.php                    Server-side validation of the built-in fields
   form/
     helper-functions.php                 Settings, API endpoints, cache, display options
     fields.php                           Field registry and the custom_rfi_form_fields filter
@@ -173,21 +177,38 @@ includes/
 plugin-update-checker/                   Third-party library (MIT), loaded only when CUSTOM_RFI_FORM_UPDATE_URL is set
 docs/
   adding-custom-fields.md                Tutorial: adding fields to the form
+tests/
+  run.php                                PHP test runner (php tests/run.php)
+  php/                                   PHP tests: rendering, submission, validation, fields, settings
+  js/                                    JavaScript tests (jsdom): filtering and validation scripts
+.github/workflows/tests.yml              CI: PHP 7.4–8.3 and JavaScript tests on every push
 ```
 
 ## Security notes
 
 - **No secrets or hostnames in the code.** The Form Track ID is a public campaign identifier: it is rendered in every page and can be overridden with `?trackid=`. Endpoints are configuration (see [API endpoints](#api-endpoints)), and can be locked in `wp-config.php`.
 - **Escaping.** All output is escaped, including shortcode attributes, which any Contributor can set.
-- **Request handling.** Submissions require a nonce. Only allow-listed fields are forwarded to the API.
+- **Request handling.** Submissions require a nonce. Every field is validated on the server, not just in the browser, and only allow-listed fields are forwarded to the API.
 - **Debug mode** never shows payloads to visitors.
 - **Settings** are saved through the Settings API, with allow-lists. Endpoint URLs must use HTTPS and contain no credentials.
 
 ## Known limitations
 
 - **Page caching and nonces.** WordPress nonces expire after 12–24 hours. If pages with the form are cached longer than that, visitors get an "expired session" error. Exclude those pages from full-page caching or keep the cache TTL under 12 hours.
-- **Names.** The server keeps only ASCII letters and hyphens in names, so "José" and "Mary Ann" are changed. Relax this only once the lead API is confirmed to accept other characters.
+- **Directory outages.** If the directory API cannot be reached when a lead is submitted, the server only checks that a program was chosen and leaves the final decision to the lead API, instead of rejecting every lead while the directory is down.
 - **Staging** may use plain HTTP and is meant only for internal environments.
+
+## Development
+
+The tests need no WordPress install: the PHP suite runs the plugin against lightweight WordPress stubs, and the JavaScript suite loads the scripts in jsdom.
+
+```bash
+php tests/run.php   # PHP tests
+npm install         # once, for the JavaScript tests
+npm test            # JavaScript tests
+```
+
+GitHub Actions runs both on every push and pull request.
 
 ## Author
 

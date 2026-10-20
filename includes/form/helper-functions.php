@@ -368,13 +368,36 @@ function custom_rfi_form_get_thank_you_url( $atts = array() ) {
 }
 
 /**
- * Sign a return URL so the submission handler can trust the value posted back by the form.
+ * Sign a value the form posts back (the return URL, the feature list ID), so the
+ * submission handler can trust it. The context keeps a signature for one field
+ * from being valid for another.
  *
- * @param string $url URL to sign.
+ * @param string $context What is being signed, e.g. 'returntourl'.
+ * @param string $value   Value to sign.
  * @return string
  */
-function custom_rfi_form_sign_url( $url ) {
-    return hash_hmac( 'sha256', $url, wp_salt( 'nonce' ) );
+function custom_rfi_form_sign( $context, $value ) {
+    return hash_hmac( 'sha256', $context . '|' . $value, wp_salt( 'nonce' ) );
+}
+
+/**
+ * Read a signed value posted back by the form.
+ *
+ * @param string $field     Posted field holding the value.
+ * @param string $sig_field Posted field holding its signature.
+ * @return string|null The value, or null when it is missing or the signature does not match.
+ */
+function custom_rfi_form_get_signed_post_value( $field, $sig_field ) {
+    // phpcs:disable WordPress.Security.NonceVerification.Missing -- verified by the submission handler.
+    $value     = isset( $_POST[ $field ] ) && is_string( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : null;
+    $signature = isset( $_POST[ $sig_field ] ) && is_string( $_POST[ $sig_field ] ) ? wp_unslash( $_POST[ $sig_field ] ) : '';
+    // phpcs:enable
+
+    if ( null === $value || '' === $signature || ! hash_equals( custom_rfi_form_sign( $field, $value ), $signature ) ) {
+        return null;
+    }
+
+    return $value;
 }
 
 /**

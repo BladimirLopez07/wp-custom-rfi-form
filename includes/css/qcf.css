@@ -5,33 +5,7 @@
     background-color: var(--form-background);
 }
 
-/* Apply "Lato" font family to all form fields except #submitBtn
-#rfiform input[type="text"],
-#rfiform input[type="email"],
-#rfiform input[type="password"],
-#rfiform textarea,
-#rfiform select,
-#rfiform input[type="checkbox"],
-#rfiform input[type="radio"],
-#rfiform input[type="number"],
-#rfiform input[type="tel"],
-#rfiform input[type="url"],
-#rfiform input[type="search"],
-#rfiform input[type="date"],
-#rfiform input[type="time"],
-#rfiform input[type="datetime-local"],
-#rfiform input[type="month"],
-#rfiform input[type="week"],
-#rfiform input[type="color"],
-#rfiform input[type="range"],
-#rfiform input[type="file"],
-#rfiform input[type="reset"],
-#rfiform input[type="submit"],
-#rfiform button:not(#submitBtn) {
-    font-family: var(--secondary-font);
-}
- */
-.goback {
+.request-info .goback {
     display: block;
     font-size: 14px;
     cursor: pointer;
@@ -39,15 +13,15 @@
     margin-bottom: 7px;
 }
 
-.goback:hover {
+.request-info .goback:hover {
     color: var(--form-text-color);
 }
 
-form label {
+#rfiform label {
     display: none;
 }
 
-form input, form select {
+#rfiform input, #rfiform select, #rfiform textarea {
     max-width: 100%;
     width: 100%;
 }
@@ -202,22 +176,22 @@ form input, form select {
     margin-bottom: 14px;
 }
 
-.two-step .step-one-images, .two-step .step-two-images {
+#rfiform.two-step .step-one-images, #rfiform.two-step .step-two-images {
     display: flex;
     justify-content: center;
     height: 18px;
 }
 
-.two-step .steps-text {
+#rfiform.two-step .steps-text {
     margin: 9.5px 0 27px;
     font-size: 13px;
 }
 
-.two-step .hide-step {
+#rfiform.two-step .hide-step {
     display: none;
 }
 
-div[data-field-name="validate_xx"] {
+#rfiform div[data-field-name="validate_xx"] {
     opacity: 0;
     position: absolute;
     top: 0;
@@ -233,7 +207,7 @@ div[data-field-name="validate_xx"] {
         width: 100%;
         height: auto;
     }
-    .two-step .step-one-images, .two-step .step-two-images {
+    #rfiform.two-step .step-one-images, #rfiform.two-step .step-two-images {
         text-align: center;
     }
 }

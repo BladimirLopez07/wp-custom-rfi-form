@@ -84,6 +84,22 @@ function custom_rfi_form_lookup_postal_code( $postal_code ) {
 }
 
 /**
+ * Clean up a person's name without changing how it is spelled.
+ *
+ * Keeps letters from any language (José, Zoë), spaces, apostrophes (O'Connor)
+ * and hyphens (Mary-Jane); removes digits and symbols, and collapses whitespace.
+ *
+ * @param string $name Name as typed.
+ * @return string
+ */
+function custom_rfi_form_normalize_name( $name ) {
+    $name = preg_replace( "/[^\p{L}\p{M}'’ -]/u", '', (string) $name );
+    $name = trim( preg_replace( '/\s+/u', ' ', (string) $name ) );
+
+    return mb_substr( $name, 0, 25 );
+}
+
+/**
  * Format a phone number as E.164, assuming +1 (USA/Canada) for 10-digit numbers.
  *
  * @param string $phone_number Phone number in any format.
@@ -110,14 +126,9 @@ function custom_rfi_form_format_phone_e164( $phone_number ) {
  * @return string
  */
 function custom_rfi_form_get_redirect_url() {
-    $url       = isset( $_POST['returntourl'] ) && is_string( $_POST['returntourl'] ) ? esc_url_raw( wp_unslash( $_POST['returntourl'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-    $signature = isset( $_POST['returntourl_sig'] ) && is_string( $_POST['returntourl_sig'] ) ? sanitize_text_field( wp_unslash( $_POST['returntourl_sig'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    $url = esc_url_raw( (string) custom_rfi_form_get_signed_post_value( 'returntourl', 'returntourl_sig' ) );
 
-    if ( $url && $signature && hash_equals( custom_rfi_form_sign_url( $url ), $signature ) ) {
-        return $url;
-    }
-
-    return custom_rfi_form_get_thank_you_url();
+    return $url ? $url : custom_rfi_form_get_thank_you_url();
 }
 
 /**
@@ -134,31 +145,38 @@ function custom_rfi_form_submission_failed() {
 }
 
 /**
- * Build the JSON payload for the lead API from the posted form.
+ * The posted built-in fields, sanitized and normalized, ready for custom_rfi_form_validate_lead().
  *
+ * Formatting is normalized (phone, zip, spacing in names); values are never rewritten
+ * into something else. Invalid input is left for validation to reject.
+ *
+ * @return array
+ */
+function custom_rfi_form_get_normalized_fields() {
+    $form_data = custom_rfi_form_get_posted_fields();
+
+    $form_data['firstname'] = custom_rfi_form_normalize_name( $form_data['firstname'] );
+    $form_data['lastname']  = custom_rfi_form_normalize_name( $form_data['lastname'] );
+
+    $phone_digits = preg_replace( '/\D/', '', $form_data['dayphone'] );
+    if ( strlen( $phone_digits ) === 10 ) {
+        $form_data['dayphone'] = sprintf( '(%s) %s-%s', substr( $phone_digits, 0, 3 ), substr( $phone_digits, 3, 3 ), substr( $phone_digits, 6, 4 ) );
+    }
+
+    $form_data['postalcode'] = preg_replace( '/\D/', '', $form_data['postalcode'] );
+    $form_data['email']      = trim( $form_data['email'] );
+
+    return $form_data;
+}
+
+/**
+ * Build the JSON payload for the lead API from validated fields.
+ *
+ * @param array $form_data     Validated fields from custom_rfi_form_get_normalized_fields().
  * @param array $custom_values Custom field values from custom_rfi_form_get_custom_field_values().
  * @return array
  */
-function custom_rfi_form_build_lead( $custom_values = array() ) {
-    $form_data = custom_rfi_form_get_posted_fields();
-
-    // Names: letters and hyphens only
-    $form_data['firstname'] = preg_replace( '/[^A-Za-z-]/', '', $form_data['firstname'] );
-    $form_data['lastname']  = preg_replace( '/[^A-Za-z-]/', '', $form_data['lastname'] );
-
-    if ( preg_match( '/\d{10}/', preg_replace( '/\D/', '', $form_data['dayphone'] ), $matches ) ) {
-        $form_data['dayphone'] = sprintf( '(%s) %s-%s', substr( $matches[0], 0, 3 ), substr( $matches[0], 3, 3 ), substr( $matches[0], 6, 4 ) );
-    }
-
-    $form_data['postalcode'] = substr( preg_replace( '/\D/', '', $form_data['postalcode'] ), 0, 5 );
-
-    // Keep only the last "@" so "a@b@example.com" becomes "ab@example.com"
-    $email              = filter_var( $form_data['email'], FILTER_SANITIZE_EMAIL );
-    $last_at            = strrpos( $email, '@' );
-    $form_data['email'] = false === $last_at
-        ? $email
-        : str_replace( '@', '', substr( $email, 0, $last_at ) ) . substr( $email, $last_at );
-
+function custom_rfi_form_build_lead( $form_data, $custom_values = array() ) {
     // Analytics click IDs from first-party cookies
     $form_data['gacid']   = isset( $_COOKIE['_ga'] ) ? preg_replace( '/^.+\.(.+?\..+?)$/', '\\1', sanitize_text_field( wp_unslash( $_COOKIE['_ga'] ) ) ) : '';
     $form_data['msclkid'] = isset( $_COOKIE['_uetmsclkid'] ) ? str_replace( '_uet', '', sanitize_text_field( wp_unslash( $_COOKIE['_uetmsclkid'] ) ) ) : '';
@@ -248,13 +266,23 @@ function custom_rfi_form_handle_submission() {
         exit;
     }
 
-    // Required custom fields are checked here too, as the browser check can be bypassed.
+    // Everything is validated again here, as the browser checks can be bypassed.
+    $form_data     = custom_rfi_form_get_normalized_fields();
+    $errors        = custom_rfi_form_validate_lead( $form_data, $form_settings, custom_rfi_form_get_submitted_directory( $form_settings ) );
     $custom_values = custom_rfi_form_get_custom_field_values();
     if ( is_wp_error( $custom_values ) ) {
-        wp_die( esc_html( $custom_values->get_error_message() ), esc_html__( 'Missing information', 'custom-rfi-form' ), array( 'response' => 400, 'back_link' => true ) );
+        $errors[] = $custom_values->get_error_message();
     }
 
-    $form_data = custom_rfi_form_build_lead( $custom_values );
+    if ( $errors ) {
+        wp_die(
+            '<p>' . implode( '<br>', array_map( 'esc_html', $errors ) ) . '</p>',
+            esc_html__( 'Missing information', 'custom-rfi-form' ),
+            array( 'response' => 400, 'back_link' => true )
+        );
+    }
+
+    $form_data = custom_rfi_form_build_lead( $form_data, $custom_values );
     $json_data = wp_json_encode( $form_data, JSON_UNESCAPED_SLASHES );
 
     // Debug mode shows the payload instead of sending it, to administrators only.

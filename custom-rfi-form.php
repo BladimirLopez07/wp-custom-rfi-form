@@ -23,6 +23,7 @@ require_once CUSTOM_RFI_FORM_PATH . 'includes/form/helper-functions.php';
 require_once CUSTOM_RFI_FORM_PATH . 'includes/form/fields.php';
 require_once CUSTOM_RFI_FORM_PATH . 'includes/form/class-custom-rfi-form-api.php';
 require_once CUSTOM_RFI_FORM_PATH . 'includes/custom-form-submission.php';
+require_once CUSTOM_RFI_FORM_PATH . 'includes/lead-validation.php';
 require_once CUSTOM_RFI_FORM_PATH . 'includes/class-custom-form-shortcode.php';
 require_once CUSTOM_RFI_FORM_PATH . 'includes/class-custom-rfi-form-plugin.php';
 

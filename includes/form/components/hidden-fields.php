@@ -3,7 +3,7 @@
  * Hidden tracking and attribution fields sent with the lead.
  * Empty values are filled in by rfi-tracking.js / custom-form-additional.js or on the server.
  *
- * Expects $form_opt, $fields and $thank_you_url from Custom_RFI_Form_Shortcode::render_shortcode().
+ * Expects $form_opt, $fields, $atts and $thank_you_url from Custom_RFI_Form_Shortcode::render_shortcode().
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -26,7 +26,10 @@ $return_url = esc_url_raw( $thank_you_url );
 <input type="hidden" name="country" id="country" value="">
 <input type="hidden" name="phone" id="phone" value="">
 <input type="hidden" name="returntourl" id="returntourl" value="<?php echo esc_attr( $return_url ); ?>">
-<input type="hidden" name="returntourl_sig" id="returntourl_sig" value="<?php echo esc_attr( custom_rfi_form_sign_url( $return_url ) ); ?>">
+<input type="hidden" name="returntourl_sig" id="returntourl_sig" value="<?php echo esc_attr( custom_rfi_form_sign( 'returntourl', $return_url ) ); ?>">
+<?php // Lets the server check the submitted program against the same directory the visitor saw. ?>
+<input type="hidden" name="_rfi_feature_id" value="<?php echo esc_attr( $atts['feature_list_id'] ); ?>">
+<input type="hidden" name="_rfi_feature_sig" value="<?php echo esc_attr( custom_rfi_form_sign( '_rfi_feature_id', $atts['feature_list_id'] ) ); ?>">
 <input type="hidden" name="TrackingSessionGUID" id="TrackingSessionGUID" value="">
 <input type="hidden" name="APIKey" id="APIKey" value="<?php echo esc_attr( $form_opt['form_track_id'] ); ?>">
 <input type="hidden" name="UserAgreement" id="UserAgreement" value="<?php echo esc_attr( $form_opt['disclaimer'] ); ?>"/>

@@ -1,0 +1,11 @@
+{
+  "name": "wp-custom-rfi-form",
+  "private": true,
+  "description": "Development tooling for the Custom RFI Form WordPress plugin.",
+  "scripts": {
+    "test": "node --test tests/js/*.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.3"
+  }
+}
